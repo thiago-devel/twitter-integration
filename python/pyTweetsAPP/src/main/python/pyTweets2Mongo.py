@@ -6,7 +6,7 @@ from dateutil import parser
 
 def datetimeJsonConverter(obj):
     if isinstance(obj, datetime.datetime):
-        return "{}-{}-{}T{}:{}:{}.{}{}".format(obj.year, obj.month, obj.day, obj.hour, obj.minute, obj.second, obj.microsecond, obj.tzinfo)       
+        return "{}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}Z".format(obj.year, obj.month, obj.day, obj.hour, obj.minute, obj.second, obj.microsecond)       
 
 def loadProperties():
     with open('../resources/config.properties') as fp:
@@ -20,7 +20,11 @@ def encodeHashtags(properties):
         ).replace('#','%23')
     ).replace(',', '%20OR%20')
     
-def prepareRequestUrl(properties):        
+def prepareRequestUrl(properties):
+    now = datetime.datetime.now()
+            
+    ##+ '&until=' + str(now.year) + '-' + str(now.month) + '-' + str((datetime.datetime.today() - datetime.timedelta(days=6)).hour) \
+    ##+ '&until=' + str(now.year) + '-' + str(now.month) + '-' + str(now.hour) \
     return 'https://' + str(properties['tweeter.api.host']) + ':' + str(properties['tweeter.api.port'])    \
         + str(properties['tweeter.api.baseurl'])    \
         + str(properties['tweeter.api.endpoint.search'])    \
@@ -123,11 +127,33 @@ tweets = filtered_tweets_data['tweets']
 statuses = filtered_tweets_data['statuses']
 user_tweets = loadUserTweets(statuses, tweets)  
 data_of_five_most_followed_users = retrieveFiveMostFollowedUsers(user_tweets)
-#print 'All the retrieved data: ' + (json.dumps(filtered_tweets_data))
-            
-    
-#print (json.dumps(user_tweets))
 
-#print 'Data of the most fallowed users: ' + (json.dumps(data_of_five_most_followed_users, default=json_util.default))
-print 'Data of the most fallowed users: '
-print (json.dumps(data_of_five_most_followed_users, indent=4, sort_keys=False, default=datetimeJsonConverter))
+
+#print 'Data of the most fallowed users: '
+#print (json.dumps(data_of_five_most_followed_users, indent=4, sort_keys=False, default=datetimeJsonConverter))
+
+tweets_by_time = {}
+tmp_tweets_by_time = []
+for tweet in tweets:
+    obj = tweet['created_at']
+    hour = obj.hour
+    day = obj.day
+    month = obj.month
+    #if isinstance(obj, datetime.datetime):
+    if hour in range(1, 24):
+        tweet_by_time = {}
+        tweet_by_time['hour'] = hour
+        tweet_by_time['day'] = day
+        tweet_by_time['month'] = month
+        tweet_by_time['tweet_id'] = (tweet['id']) 
+        tweet_by_time['tweet_created_at'] = (tweet['created_at']) 
+        tweet_by_time['user_id'] = (tweet['user_id'])
+        tweet_by_time['hashtags'] = (tweet['hashtags'])
+        tmp_tweets_by_time.append(tweet_by_time)
+#for tweet_by_time                    
+                    #print "%s %s %s" % (h, d, m)                        
+print "tmp_tweets_by_time: "                        
+print json.dumps(tmp_tweets_by_time, indent=4, sort_keys=False, default=datetimeJsonConverter)                        
+
+#print (json.dumps(tmp_tweets_by_time, indent=4, sort_keys=False, default=datetimeJsonConverter))
+#print (json.dumps(tmp_tweets_by_time)
