@@ -1,0 +1,26 @@
+{
+  "configs": [
+    "tweets-api.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "tweets-app",
+  "minMuleVersion": "4.1.1",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedResources": [
+        "api/.gitignore",
+        "api/exchange_modules/909fa61a-0d5a-4b5d-88df-f75aa84375e5/tweet-datatype/1.0.8/tweet-datatype.raml",
+        "api/exchange_modules/909fa61a-0d5a-4b5d-88df-f75aa84375e5/tweet-exemples/1.0.11/example.raml",
+        "api/exchange_modules/909fa61a-0d5a-4b5d-88df-f75aa84375e5/tweet-exemples/1.0.11/tweet-exemples.raml",
+        "api/tweets-api.raml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

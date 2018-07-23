@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="twitter_search_response-example" format="json">
+      <types:example format="json" location="schema/twitter_search_response-example.json"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#c6fa4860-62bc-44d7-88d3-3c0ac07713e1">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="twitter_search_response-example"/>
+        </types:message>
+        <types:variables>
+          <types:variable name="tweets_result" type="twitter_search_response-example"/>
+        </types:variables>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="twitter_search_response-example"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

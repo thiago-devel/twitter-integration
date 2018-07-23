@@ -1,0 +1,61 @@
+"user": {
+    "id": 221008010,
+    "id_str": "221008010",
+    "name": "Antoine \ud83d\udc19 Neveux",
+    "screen_name": "antoineneveux",
+    "location": "France",
+    "description": "\ud83c\udfe2 Je fais de l'ordinateur chez @WorldlineFrance.\n\n\n\n\ud83d\ude0d J'aime les chats et les pommes de terre.",
+    "url": "https:\/\/t.co\/5Ch66U4sSs",
+    "entities": {
+        "url": {
+            "urls": [
+                {
+                    "url": "https:\/\/t.co\/5Ch66U4sSs",
+                    "expanded_url": "https:\/\/github.com\/aneveux",
+                    "display_url": "github.com\/aneveux",
+                    "indices": [
+                        0,
+                        23
+                    ]
+                }
+            ]
+        },
+        "description": {
+            "urls": []
+        }
+    },
+    "protected": false,
+    "followers_count": 214,
+    "friends_count": 610,
+    "listed_count": 3,
+    "created_at": "Mon Nov 29 13:47:23 +0000 2010",
+    "favourites_count": 317,
+    "utc_offset": null,
+    "time_zone": null,
+    "geo_enabled": false,
+    "verified": false,
+    "statuses_count": 344,
+    "lang": "fr",
+    "contributors_enabled": false,
+    "is_translator": false,
+    "is_translation_enabled": false,
+    "profile_background_color": "000000",
+    "profile_background_image_url": "http:\/\/abs.twimg.com\/images\/themes\/theme14\/bg.gif",
+    "profile_background_image_url_https": "https:\/\/abs.twimg.com\/images\/themes\/theme14\/bg.gif",
+    "profile_background_tile": false,
+    "profile_image_url": "http:\/\/pbs.twimg.com\/profile_images\/949373638192574465\/Ur2fNpWq_normal.jpg",
+    "profile_image_url_https": "https:\/\/pbs.twimg.com\/profile_images\/949373638192574465\/Ur2fNpWq_normal.jpg",
+    "profile_banner_url": "https:\/\/pbs.twimg.com\/profile_banners\/221008010\/1522964699",
+    "profile_link_color": "91D2FA",
+    "profile_sidebar_border_color": "000000",
+    "profile_sidebar_fill_color": "000000",
+    "profile_text_color": "000000",
+    "profile_use_background_image": false,
+    "has_extended_profile": true,
+    "default_profile": false,
+    "default_profile_image": false,
+    "following": null,
+    "follow_request_sent": null,
+    "notifications": null,
+    "translator_type": "none"
+}

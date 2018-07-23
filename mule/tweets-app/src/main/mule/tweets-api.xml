@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <configuration-properties doc:name="Configuration properties" doc:id="20b73cc0-5ffe-4ae5-b9f9-4f4428d6638d" file="configs.properties" />
+	<mongo:config name="MongoDB_Config" doc:name="MongoDB Config" doc:id="eedb1e7e-cb28-4e6a-a3ec-eef58e6766c4" >
+		<mongo:connection host="${mongodb.hostport}" username="${mongodb.user}" password="${mongodb.passwd}" database="${mongodb.database}" />
+	</mongo:config>
+	<http:request-config name="Tweet_API_HTTP_config" doc:name="HTTP Request configuration" doc:id="e8602071-c9f8-45cc-9d5b-4ee34970696e" basePath="${tweeter.api.baseurl}" >
+		<http:request-connection protocol="HTTPS" host="${tweeter.api.host}" port="${tweeter.api.port}" />
+	</http:request-config>
+    <http:listener-config name="tweets-api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="tweets-api-config" raml="tweets-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="tweets-api-main">
+        <http:listener config-ref="tweets-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="tweets-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="tweets-api-console">
+        <http:listener config-ref="tweets-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="tweets-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\tweets\hashtags:tweets-api-config">
+        <logger level="INFO" message="get:\tweets\hashtags:tweets-api-config" />
+    </flow>
+    <flow name="get:\tweets\hashtags\users\popular:tweets-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="8b7d1b65-006e-4a92-bd06-503c6ee55f62" message="#[payload]"/>
+		<flow-ref doc:name="remove-existing-data-appFlow" doc:id="d6a101de-9899-434e-b8ca-c0cc0e554b11" name="remove-existing-data-appFlow"/>
+		<flow-ref doc:name="twitter-pooling-appFlow" doc:id="de7e05ba-51ad-498a-9af8-3a9d6fd0806b" name="twitter-pooling-appFlow"/>
+    </flow>
+    <flow name="remove-existing-data-appFlow" doc:id="a2be34e0-7e63-407f-94ac-fff338d6f7f7" >
+		<mongo:drop-collection config-ref="MongoDB_Config" collectionName="${mongodb.collection.tweets}" doc:name="Drop collection" doc:id="5b77f67f-1def-42a9-b537-a369748f9831" />
+		<mongo:create-collection config-ref="MongoDB_Config" collectionName="${mongodb.collection.tweets}" doc:name="Create collection" doc:id="097b678b-5122-4b93-b965-fbc3426c7419" />
+	</flow>
+	<flow name="twitter-pooling-appFlow" doc:id="4e8dd617-c6c7-4cf7-b3f3-e5e390801e69" >
+		<ee:transform doc:name="Setup vars" doc:id="ac84846b-9eb6-4df3-8a24-ebd5cb955198" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="search_query" ><![CDATA[%dw 2.0
+output application/java
+---
+p("tweeter.api.endpoint.search.query")]]></ee:set-variable>
+				<ee:set-variable variableName="twitter_api_auth_header" ><![CDATA[%dw 2.0
+output application/java
+---
+p("tweeter.api.endpoint.header.authorization")]]></ee:set-variable>
+				<ee:set-variable variableName="result_type" ><![CDATA[%dw 2.0
+output application/java
+---
+p("tweeter.api.endpoint.search.result_type")]]></ee:set-variable>
+				<ee:set-variable variableName="path_search_endpoint" ><![CDATA[%dw 2.0
+output application/java
+---
+p("tweeter.api.endpoint.search")]]></ee:set-variable>
+				<ee:set-variable variableName="path_url" ><![CDATA[%dw 2.0
+output application/java
+---
+(p("tweeter.api.endpoint.search") as String) 
+++ "Egit Update Site - http://download.eclipse.org/egit/updates-2.1Egit Update Site - http://download.eclipse.org/egit/updates-2.1Egit Update Site - http://download.eclipse.org/egit/updates-2.1Egit Update Site - http://download.eclipse.org/egit/updates-2.1Egit Update Site - http://download.eclipse.org/egit/updates-2.1Egit Update Site - http://download.eclipse.org/egit/updates-2.1Egit Update Site - http://download.eclipse.org/egit/updates-2.1]]></ee:set-variable>
+				<ee:set-variable variableName="hashtags" ><![CDATA[%dw 2.0
+output application/java
+---
+(
+	(p("tweeter.api.endpoint.search.query.hashtags") as String)
+		scan /([^,]+)/
+) map $[0]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="9d2e1b80-a9f0-482c-848f-843ea849e2c9" message="#[payload]"/>
+		<http:request method="GET" doc:name="Twitter's REST API - retrieve parametrized hashtags tweets" doc:id="1641c793-401a-4d08-8347-c2f5548dafd3" config-ref="Tweet_API_HTTP_config" path="#[vars.path_url]" sendBodyMode="NEVER">
+			<http:headers ><![CDATA[#[output applicaton/java
+---
+{
+	"authorization" : vars.twitter_api_auth_header
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="c6fa4860-62bc-44d7-88d3-3c0ac07713e1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+null]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="tweets_result" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	statuses: payload.statuses,
+	search_metadata: payload.search_metada
+}
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="1c810f64-2bf4-4d96-abb2-2f241c9e39e9" message="#[payload]" />
+		<mongo:save-document  config-ref="MongoDB_Config" collectionName="${mongodb.collection.tweets}" doc:name="Save document" doc:id="d867ae11-bcb1-4fdb-8408-112bd4e268c0" >
+			<mongo:document ><![CDATA[#[vars.tweets_result]]]></mongo:document>
+		</mongo:save-document>
+		<ee:transform doc:name="Transform Message" doc:id="f89392b9-f15c-441d-b026-031b6bdd7ca2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statuses: vars.tweets_result.statuses,
+	search_metadata: vars.tweets_result.search_metadata
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

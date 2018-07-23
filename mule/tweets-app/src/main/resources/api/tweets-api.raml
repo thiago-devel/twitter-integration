@@ -1,0 +1,20 @@
+#%RAML 1.0
+version: v1
+title: tweets-api
+
+uses: 
+  Tweet: /exchange_modules/909fa61a-0d5a-4b5d-88df-f75aa84375e5/tweet-datatype/1.0.8/tweet-datatype.raml
+
+/tweets/hashtags:
+  get:
+    responses: 
+      200:
+        body:
+/tweets/hashtags/users/popular:
+  get:
+    responses: 
+      200:
+        body:
+          application/json:
+            type: Tweet.Statuses
+            example: !include /exchange_modules/909fa61a-0d5a-4b5d-88df-f75aa84375e5/tweet-exemples/1.0.11/example.raml            
